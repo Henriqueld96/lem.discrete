@@ -5,7 +5,7 @@
 %%  ~~function to do ... ~~
 }
 \description{
-Teste de McNemar exato (b+c < 20) bilateral (H1:p1 diff p2)
+Teste de McNemar exato (b+c < 20) bilateral (H1:p1 diff p2)}
 \usage{
 lem.exact.mcnemar(df)
 }
