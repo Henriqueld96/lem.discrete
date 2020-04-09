@@ -9,9 +9,9 @@ lem.exact.mcnemar <- function(df){
     i = i+1
   }
   m1
-  
-  
-  
+
+
+
   m2 = 0
   i = b
   while (i<=b+c) {
@@ -19,8 +19,12 @@ lem.exact.mcnemar <- function(df){
     i = i+1
   }
   m2
-  
-  return(c(m1,m2))
+
+  pvalor = 2*min(c(m1,m2))
+
+  re <- cbind(m1,m2,pvalor)
+  colnames(re) <- c("T1", "T2", "Pvalor")
+  return(re)
 }
 
 #n1,n2 sao marginais, x1 valor superior esquerdo da tabela, y marginal primeira coluna
@@ -37,6 +41,9 @@ lem.exact.fisher <- function(df){
     s=append(s, temp, after = length(s))
   }
   pvalor = sum(s[which(s<=obs)])
+
+  re <- cbind(pvalor)
+  colnames(re) <- c("Pvalor")
   return(pvalor)
 }
 
@@ -46,7 +53,7 @@ lem.exact.fisher <- function(df){
 lem.expected <- function(df){
   m = data.frame()
   n = sum(df)
-  
+
   for (i in 1:dim(df)[1]){
     for (j in 1:dim(df)[2]){
       m[i,j] = sum(df[i,])*sum(df[,j])/n
@@ -61,7 +68,7 @@ lem.qpearson <- function(df){
   esperado = lem.expected(df)
   vetordf = as.vector(t(df))
   vetoresp = as.vector(t(esperado))
-  
+
   s = c()
   for (i in 1:length(vetordf)){
     s = append(s, values = ((vetordf[i]-vetoresp[i])^2)/vetoresp[i], after = length(s))
@@ -87,7 +94,7 @@ lem.cov.mh <- function(df){
       t <- c()
       for (i2 in 1:dim(df)[1]){
         for (j2 in 1:dim(df)[2]){
-          
+
           if (i==i2){
             deltai=1
           }else{
@@ -98,9 +105,9 @@ lem.cov.mh <- function(df){
           }else{
             deltaj=0
           }
-          
+
           conta = (esperado[i,j]*(n*deltai-sum(df[i2,]))*(n*deltaj-sum(df[,j2])))/(n*(n-1))
-          
+
           t = append(t, conta, after=length(t))
         }
       }
@@ -116,18 +123,18 @@ lem.cov.mh <- function(df){
 #df = tabela, a = matriz contraste
 lem.qmh <- function(df, a){
   esperado <- lem.expected(df)
-  
+
   a <- as.matrix(a)
   v <- as.matrix(lem.cov.mh(df))
   nm <- as.matrix(as.vector(t(df))-as.vector(t(esperado)))
-  
+
   estat_teste <- t(nm)%*%t(a)%*%solve(a%*%v%*%t(a))%*%a%*%nm
-  
+
   gl= (dim(df)[1]-1)*(dim(df)[2]-1)
-  
+
   pvalor <- pchisq(estat_teste[1], df=gl, lower.tail = F)
-  
-  
+
+
   re <- cbind(estat_teste[1], pvalor)
   colnames(re) <- c("Estat Teste", "Pvalor")
   return(re)
@@ -137,18 +144,18 @@ lem.qmh <- function(df, a){
 #df = tabela, a = matriz contraste
 lem.qmh.ord <- function(df, a){
   esperado <- lem.expected(df)
-  
+
   a <- as.matrix(a)
   v <- as.matrix(lem.cov.mh(df))
   nm <- as.matrix(as.vector(t(df))-as.vector(t(esperado)))
-  
+
   estat_teste <- t(nm)%*%t(a)%*%solve(a%*%v%*%t(a))%*%a%*%nm
-  
+
   gl= (dim(df)[1]-1)
-  
+
   pvalor <- pchisq(estat_teste[1], df=gl, lower.tail = F)
-  
-  
+
+
   re <- cbind(estat_teste[1], pvalor)
   colnames(re) <- c("Estat Teste", "Pvalor")
   return(re)
@@ -165,11 +172,11 @@ lem.qmh.ord <- function(df, a){
 #             c(11,19,6),
 #             c(6,12,17))
 lem.qemh <- function(df, ntabs, a){
-  
+
   colunas = dim(df)[1]/ntabs
   inicio = seq(from=1, to=dim(df)[1], by=colunas)
   fim = inicio+colunas-1
-  
+
   pt <- 0
   st <- 0
   tt <- 0
@@ -179,20 +186,20 @@ lem.qemh <- function(df, ntabs, a){
     nm <- as.matrix(as.vector(t(df[inicio[t]:fim[t],]))-as.vector(t(esperado)))
     pt =  pt + t(nm)%*%t(a)
     tt =  tt + a%*%nm
-    
+
     #calculando sum (aVa')
     v <- as.matrix(lem.cov.mh(df[inicio[t]:fim[t],]))
     st = st + a%*%v%*%t(a)
-    
+
   }
-  
+
   estat_teste <- pt%*%solve(st)%*%tt
-  
+
   gl= (dim(df[inicio[1]:fim[1],])[1]-1)*(dim(df[inicio[1]:fim[1],])[2]-1)
-  
+
   pvalor <- pchisq(estat_teste[1], df=gl, lower.tail = F)
-  
-  
+
+
   re <- cbind(estat_teste[1], pvalor)
   colnames(re) <- c("Estat Teste", "Pvalor")
   return(re)
