@@ -205,3 +205,78 @@ lem.qemh <- function(df, ntabs, a){
   return(re)
 }
 
+lem.mqp <- function(df,a, X){
+  library(rlist)
+  #######
+  #  P  #
+  #######
+  P <- c()
+  for (i in 1:dim(df)[1]){
+    t <- df[i,]
+    p <- t/sum(t)
+    P = append(P,p,after=length(P))
+  }
+  P <- as.matrix(P)
+  ########
+  #   A  #
+  ########
+  l <- dim(df)[1]
+  a <- c(0,1,2)
+  A = kronecker(diag(l),t(a))
+  ########
+  #  VF  #
+  ########
+  ListaV = list()
+  for (v in 1:dim(df)[1]){
+    t <- df[v,]
+    p <- t/sum(t)
+    V <- matrix(0,length(t),length(t))
+
+    for (i in 1:length(t)){
+      for (j in 1:length(t)){
+        if (i == j){
+          V[i,j] = p[i]*(1-p[i])/sum(df[v,])
+        } else {
+          V[i,j] = -p[j]*p[i]/sum(df[v,])
+        }
+      }
+    }
+    ListaV = list.append(ListaV,V)
+  }
+
+  VF = matrix(0,dim(df)[1]*dim(df)[2],dim(df)[1]*dim(df)[2])
+  indice = seq(1,12,by=3)
+
+  for (i in indice){
+    pos = match(i, indice)
+    VF[i:(i+2),i:(i+2)] = ListaV[[pos]]
+  }
+
+  VF <- A%*%VF%*%t(A)
+
+  FP = A %*% P
+
+  B = solve(t(X)%*%solve(VF)%*%X)%*%t(X)%*%solve(VF)%*%FP
+
+
+  ut = length(FP) - (length(B))
+
+  WT = t(FP-X%*%B)%*%solve(VF)%*%(FP-X%*%B)
+  PW = pchisq(WT, ut, lower.tail = F)
+  W = cbind(WT, PW)
+  colnames(W) <- c("Chi-Square","P-valor")
+
+
+  BCOV = solve(t(X)%*%solve(VF) %*% X)
+  chiB <- c()
+  for (i in 1:length(B)){
+    t <- B[i]^2 / BCOV[i,i]
+    chiB <- rbind(chiB, c(t, pchisq(t, 1, lower.tail=F)))
+  }
+  colnames(chiB) <- c("Chi-Square", "P-valor")
+
+  saida = list("Betas estimados(B)"=B,"Vetor de respostas(FP)"=FP, "Wald (medida ajuste modelo)"=W,
+               "Chi Estimadores"=chiB)
+
+  return(saida)
+}
