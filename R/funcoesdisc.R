@@ -145,7 +145,7 @@ lem.qmh <- function(df, a){
 lem.qmh.ord <- function(df, a){
   esperado <- lem.expected(df)
 
-  a <- as.matrix(a)
+  a <- t(as.matrix(a))
   v <- as.matrix(lem.cov.mh(df))
   nm <- as.matrix(as.vector(t(df))-as.vector(t(esperado)))
 
@@ -279,4 +279,12 @@ lem.mqp <- function(df,a, X){
                "Chi Estimadores"=chiB)
 
   return(saida)
+}
+
+lem.f.retas <- function(C,B,X,Y,df1,df2){
+  EstatF <- ((t(C%*%B) %*% solve(C%*% (solve(t(X)%*%X)) %*% t(C)) %*% (C%*%B))/df1)/((t(Y)%*%Y-t(B)%*%t(X)%*%Y)/df2)
+  pvalor = 1-pf(EstatF, df1, df2)
+  re <- cbind(EstatF, pvalor)
+  colnames(re) <- c("Estat Teste", "Pvalor")
+  return(re)
 }
