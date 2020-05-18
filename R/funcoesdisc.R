@@ -245,11 +245,11 @@ lem.mqp <- function(df,a, X){
   }
 
   VF = matrix(0,dim(df)[1]*dim(df)[2],dim(df)[1]*dim(df)[2])
-  indice = seq(1,12,by=3)
+  indice = seq(1,dim(df)[1]*dim(df)[2],by=dim(df)[2])
 
   for (i in indice){
     pos = match(i, indice)
-    VF[i:(i+2),i:(i+2)] = ListaV[[pos]]
+    VF[i:(i+dim(df)[2]-1),i:(i+dim(df)[2]-1)] = ListaV[[pos]]
   }
 
   VF <- A%*%VF%*%t(A)
