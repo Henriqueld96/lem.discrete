@@ -221,7 +221,6 @@ lem.mqp <- function(df,a, X){
   #   A  #
   ########
   l <- dim(df)[1]
-  a <- c(0,1,2)
   A = kronecker(diag(l),t(a))
   ########
   #  VF  #
